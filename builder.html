@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1e2242">
+<meta name="robots" content="noindex">
+<title>Trip Builder · Anchor And Wand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: the advisor's quiet back office, fast and tidy
+   IDEA: a client ledger: one row per family, one page per trip
+   PICTURE: the client list itself, sorted by what's coming up
+   COLOUR and TYPE: card navy and foil gold on ivory; Allura, Cormorant Garamond, Jost
+   LAYOUT: navy header, list or editor in one column, sticky save bar */
+:root{color-scheme:light dark;--navy:#1e2242;--gold:#d8b96c;--gold2:#f0dfaa;
+--bg:light-dark(#f6f2ea,#11142a);--card:light-dark(#fff,#1b1f3b);--ink:light-dark(#1e2242,#f1ece0);--mute:light-dark(#6c6a78,#a9a6b8);--line:light-dark(#e6dfd0,#2c3155);--field:light-dark(#fbf9f4,#151933);--goldInk:light-dark(#8a6a1f,#e2c47c)}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Jost,system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}a{color:inherit}
+.script{font-family:Allura,cursive}.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.foil{background:linear-gradient(100deg,#b8934a,var(--gold2) 45%,#c9a456 70%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+header{background:var(--navy);color:#fff}
+.wrap{max-width:900px;margin:0 auto;padding:0 max(4vw,16px)}
+.top{display:flex;align-items:center;gap:10px;padding-top:16px;padding-bottom:16px;flex-wrap:wrap}
+.top .script{font-size:32px;line-height:1}
+.top .t{color:#c9c4d9;font-size:14px;flex:1}
+main.wrap{padding-top:20px;padding-bottom:120px}
+h1{font:600 clamp(30px,6vw,42px)/1.05 'Cormorant Garamond',serif;margin:0}
+h2{font:600 24px/1.15 'Cormorant Garamond',serif;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;font-weight:500;white-space:nowrap}
+.btn.gold{background:linear-gradient(120deg,#c7a35a,var(--gold2));color:#1e2242;border:0}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn.x{border:0;background:none;color:var(--mute);min-width:40px;padding:0}
+.btn.hd{border-color:rgba(216,185,108,.45);background:none;color:var(--gold2)}
+.mute{color:var(--mute)}.small{font-size:14px}
+label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+input,select,textarea{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-height:44px;font-size:16px;width:100%;color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+.g{display:grid;gap:10px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.full{grid-column:1/-1}
+@media(max-width:600px){.g2,.g3{grid-template-columns:minmax(0,1fr)}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* list */
+.tc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.tc .nm{font:600 22px/1.15 'Cormorant Garamond',serif}
+.st{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12px;border:1px solid var(--line);margin-left:6px;vertical-align:middle;font-family:Jost,sans-serif;font-weight:500}
+.st.Booked{background:#e8f1e9;color:#2d5b35;border-color:#cfe2d2}.st.Traveling{background:#f6ecd4;color:#7a5a12;border-color:#ead9ae}.st.Complete{background:var(--field);color:var(--mute)}
+.sec{margin:22px 0 8px;font-size:14px;color:var(--goldInk);font-weight:500}
+/* editor */
+.it{display:grid;grid-template-columns:110px minmax(0,1fr) 40px;gap:6px;align-items:center;margin-bottom:6px}
+@media(max-width:600px){.it{grid-template-columns:96px minmax(0,1fr) 40px}}
+.trow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.4fr) 70px 70px 70px 40px;gap:6px;align-items:end;padding:10px 0;border-top:1px solid var(--line)}
+@media(max-width:600px){.trow{grid-template-columns:repeat(3,minmax(0,1fr)) 40px}.trow .w2{grid-column:span 2}.trow .w3{grid-column:1/-1}}
+details.bk{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--field)}
+details.bk summary{list-style:none;display:flex;gap:10px;align-items:center;padding:12px;cursor:pointer;min-height:48px}
+details.bk summary::-webkit-details-marker{display:none}
+details.bk summary .ty{font-size:12px;color:var(--goldInk);font-weight:500;width:84px;flex:none}
+details.bk .body{padding:0 12px 12px}
+.day{border-top:1px solid var(--line);padding:10px 0}
+.pkl{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:6px;margin-bottom:6px}
+.save{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px max(4vw,16px) max(10px,env(safe-area-inset-bottom));z-index:6}
+.save .wrap{display:flex;gap:8px;align-items:center;padding:0}
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:12px;padding:10px 16px;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+dialog{border:0;border-radius:18px;padding:0;width:min(560px,94vw);background:var(--card);color:var(--ink)}dialog::backdrop{background:rgba(10,12,30,.6)}
+.dlg{padding:18px;display:grid;gap:12px}
+.login{max-width:420px;margin:8vh auto;text-align:center}
+.banner{background:var(--card);border:1px dashed var(--gold);border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+<script src="config.js"></script>
+<script src="shared.js"></script>
+</head>
+<body>
+<header><div class="wrap top"><div class="script foil">Anchor And Wand</div><div class="t">Trip Builder</div><button class="btn sm hd" id="hdBtn" hidden data-a="logout">Log out</button></div></header>
+<main class="wrap" id="main"></main>
+<div class="save" id="save" hidden><div class="wrap"><span class="small mute sp" id="saveMsg"></span><button class="btn" data-a="preview">Preview</button><button class="btn gold" data-a="save">Save</button></div></div>
+<dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+<script>
+{
+const {C,uid,esc,num,parseD,fmt,KINDS,TEMPLATES,packingFor,BTYPES,blankTrip,sampleTrip,api,ls}=window.AW;
+const A=C.advisor||{};
+const DEMO=!C.API_URL;
+const $=s=>document.querySelector(s);
+const ss={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
+let key=ss.get('aw-key')||ls.get('aw-key')||'', trips=[], draft=null, dirty=false, openBk=new Set(), armed=null, viewMode='list', q='';
+
+/* ---------- store ---------- */
+const demoAll=()=>{let t=ls.get('aw-demo-trips');if(!t){const s=sampleTrip();delete s.sample;s.id='demo';t={demo:s};ls.set('aw-demo-trips',t)}return t};
+const S={
+  async list(){if(DEMO)return Object.values(demoAll()).map(t=>({id:t.id,pin:t.pin,client:t.client,title:t.title,dest:t.dest,start:t.start,days:t.days,status:t.status}));return (await api({action:'list',key})).trips},
+  async get(id){if(DEMO){const t=JSON.parse(JSON.stringify(demoAll()[id]));t.ticks=ls.get('aw-ticks-'+(id==='demo'?'demo':id))||{};return t}return (await api({action:'get',key,id})).trip},
+  async save(t){const c=JSON.parse(JSON.stringify(t));delete c.ticks;if(DEMO){const all=demoAll();if(!c.id)c.id=Math.random().toString(36).slice(2,14);if(!c.pin)c.pin=String(1000+Math.floor(Math.random()*9000));all[c.id]=c;ls.set('aw-demo-trips',all);return c}return (await api({action:'save',key,trip:c})).trip},
+  async del(id){if(DEMO){const all=demoAll();delete all[id];ls.set('aw-demo-trips',all);return}await api({action:'delete',key,id})}
+};
+const linkFor=t=>new URL('index.html?t='+encodeURIComponent(t.id),location.href).href;
+const shareText=t=>`Hi ${t.client||'there'}! Your trip page for ${t.title||'your trip'} is ready:\n${linkFor(t)}\n\nYour family code is ${t.pin}\n\nFlights, hotels, your day-by-day plan, a packing list and the weather are all in one place. Message me anytime!\n${(A.name||'').split(' ')[0]}\n${A.business||''}`;
+
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.append(d);setTimeout(()=>d.remove(),2600)}
+function busy(on){document.body.style.cursor=on?'progress':''}
+
+/* ---------- login ---------- */
+function loginView(msg){
+  viewMode='login';$('#save').hidden=true;$('#hdBtn').hidden=true;
+  $('#main').innerHTML=`<div class="login card"><div class="script foil" style="font-size:44px">Welcome back</div><p class="mute">Enter your builder password.</p>
+  <form id="lf" class="g"><input type="password" id="pw" autocomplete="current-password" aria-label="Password" required><label style="display:flex;gap:8px;align-items:center;justify-content:center"><input type="checkbox" id="rem" style="width:20px;min-height:0"> Remember on this device</label><button class="btn gold">Log in</button>${msg?`<div style="color:#b3402a">${esc(msg)}</div>`:''}</form></div>`;
+  $('#lf').addEventListener('submit',async e=>{e.preventDefault();key=$('#pw').value;busy(1);
+    try{await api({action:'login',key});ss.set('aw-key',key);if($('#rem').checked)ls.set('aw-key',key);busy(0);listView()}
+    catch(err){busy(0);key='';loginView(err.message)}});
+  setTimeout(()=>$('#pw')&&$('#pw').focus(),50);
+}
+
+/* ---------- list ---------- */
+async function listView(){
+  viewMode='list';$('#save').hidden=true;$('#hdBtn').hidden=DEMO;draft=null;dirty=false;
+  $('#main').innerHTML=`<p class="mute">Loading trips…</p>`;
+  try{trips=await S.list()}catch(e){if(/password/i.test(e.message)){ls.del('aw-key');ss.del('aw-key');return loginView(e.message)}$('#main').innerHTML=`<div class="card">Couldn’t load trips: ${esc(e.message)} <button class="btn sm" data-a="list">Try again</button></div>`;return}
+  drawList();
+}
+function drawList(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const end=t=>{const s=parseD(t.start);if(!s)return null;const e=new Date(s);e.setDate(e.getDate()+num(t.days,1));return e};
+  const f=trips.filter(t=>!q||`${t.client} ${t.title} ${t.dest}`.toLowerCase().includes(q.toLowerCase()));
+  const grp={now:[],up:[],tbd:[],past:[]};
+  f.forEach(t=>{const s=parseD(t.start),e=end(t);if(!s)grp.tbd.push(t);else if(e<=today)grp.past.push(t);else if(s<=today)grp.now.push(t);else grp.up.push(t)});
+  grp.up.sort((a,b)=>a.start.localeCompare(b.start));grp.past.sort((a,b)=>b.start.localeCompare(a.start));
+  const card=t=>{const s=parseD(t.start);const st=t.status||'Planning';
+    const dleft=s?Math.round((s-today)/864e5):null;
+    return `<div class="card tc"><div><div class="nm">${esc(t.client||'Unnamed client')}<span class="st ${esc(st)}">${esc(st)}</span></div>
+    <div>${esc(t.title||'Untitled trip')}${t.dest?' · '+esc(t.dest):''}</div>
+    <div class="small mute">${s?`${fmt(s,{month:'short',day:'numeric',year:'numeric'})} · ${t.days} days${dleft>0?` · in ${dleft} days`:''}`:'Dates not set'}</div></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn sm" data-a="share" data-id="${esc(t.id)}">Send</button><button class="btn sm gold" data-a="edit" data-id="${esc(t.id)}">Open</button></div></div>`};
+  const sec=(n,arr)=>arr.length?`<div class="sec">${n}</div>${arr.map(card).join('')}`:'';
+  $('#main').innerHTML=`${DEMO?`<div class="banner">Preview mode: trips save on this device only. Connect Google in config.js to go live.</div>`:''}
+  <div class="row" style="margin-bottom:6px"><h1 class="sp">Your clients</h1><button class="btn gold" data-a="new">+ New trip</button></div>
+  <input id="q" placeholder="Search clients or destinations" value="${esc(q)}" aria-label="Search">
+  ${sec('Traveling now',grp.now)}${sec('Upcoming',grp.up)}${sec('No dates yet',grp.tbd)}${sec('Past trips',grp.past)}
+  ${!trips.length?`<div class="card" style="text-align:center;margin-top:14px"><h2>No trips yet</h2><p class="mute">Create your first client trip. You’ll get a private link and family code to send them.</p><button class="btn gold" data-a="new">+ New trip</button></div>`:''}
+  ${trips.length&&!f.length?'<p class="mute">No matches.</p>':''}`;
+}
+
+/* ---------- editor ---------- */
+async function editView(id){
+  if(id){busy(1);try{draft=await S.get(id)}catch(e){busy(0);toast(e.message);return}busy(0)}
+  else draft=blankTrip('park');
+  dirty=!id;openBk=new Set();viewMode='edit';drawEdit();scrollTo(0,0);
+}
+const dayOpts=(v,extra)=>`<option value="">—</option>`+Array.from({length:num(draft.days,1)+(extra?1:0)},(_,i)=>i+1).map(d=>{const dt=window.AW.dayDate(draft,d);return `<option value="${d}"${num(v,0)===d?' selected':''}>Day ${d}${dt?' · '+fmt(dt,{month:'short',day:'numeric'}):''}</option>`}).join('');
+function drawEdit(){
+  const t=draft, N=num(t.days,1);
+  $('#save').hidden=false;$('#hdBtn').hidden=DEMO;setSaveMsg();
+  const tk=t.ticks||{}, packed=(t.packing||[]).filter(i=>tk[i.id]).length;
+  const lists=[...new Set((t.packing||[]).map(i=>i.list))];
+  let h=`<div class="row" style="margin-bottom:12px"><button class="btn sm" data-a="back">← All clients</button><span class="sp"></span>${t.id?`<button class="btn sm" data-a="share" data-id="${esc(t.id)}">Send to client</button>`:''}</div>
+  <h1 style="margin-bottom:14px">${esc(t.client||'New trip')}</h1>
+
+  <div class="card"><h2>The basics</h2><div class="g g2">
+    <label>Client name, as they’ll be greeted<input data-b="client" value="${esc(t.client)}" placeholder="The Smith Family"></label>
+    <label>Trip title<input data-b="title" value="${esc(t.title)}" placeholder="Walt Disney World"></label>
+    <label>Destination (used for weather)<input data-b="dest" value="${esc(t.dest)}" placeholder="Orlando, Florida"></label>
+    <label>Kind of trip<select data-b="kind" data-r>${Object.entries(KINDS).map(([k,n])=>`<option value="${k}"${k===t.kind?' selected':''}>${n}</option>`).join('')}</select></label>
+    <label>First day<input type="date" data-b="start" data-r value="${esc(t.start)}"></label>
+    <label>Number of days<input type="number" min="1" max="60" data-b="days" data-r data-n value="${N}"></label>
+    <label>Status<select data-b="status">${['Planning','Booked','Traveling','Complete'].map(s=>`<option${s===(t.status||'Planning')?' selected':''}>${s}</option>`).join('')}</select></label>
+    <label>Family code (clients enter this)<div class="row" style="flex-wrap:nowrap"><input data-b="pin" inputmode="numeric" value="${esc(t.pin||'')}" placeholder="Made on save"><button type="button" class="btn sm" data-a="newpin">New</button></div></label>
+    <label class="full">Personal note on their page<textarea data-b="message" placeholder="I’m so excited for you…">${esc(t.message)}</textarea></label>
+    <label class="full">Private notes (only you see these)<textarea data-b="privateNotes" placeholder="Deposits, preferences, commission…">${esc(t.privateNotes)}</textarea></label>
+  </div></div>
+
+  <div class="card"><h2>Who’s traveling</h2><p class="small mute" style="margin-top:-6px">Add a group for each set of people. Set the days they’re there and the page shows who’s on the trip each day.</p>
+  ${(t.travelers||[]).map((g,i)=>`<div class="trow"><label class="w2">Group<input data-b="travelers.${i}.label" value="${esc(g.label)}"></label><label class="w3">Names<input data-b="travelers.${i}.who" value="${esc(g.who)}" placeholder="Optional"></label><label>People<input type="number" min="0" data-n data-b="travelers.${i}.count" value="${num(g.count,0)}"></label><label>From<input type="number" min="1" max="${N}" data-n data-r data-b="travelers.${i}.from" value="${num(g.from,1)}"></label><label>To<input type="number" min="1" max="${N}" data-n data-r data-b="travelers.${i}.to" value="${num(g.to,N)}"></label><button class="btn x" data-a="del" data-p="travelers.${i}" aria-label="Remove group">✕</button></div>`).join('')}
+  <button class="btn sm" data-a="addtrav">+ Add group</button></div>
+
+  <div class="card"><h2>Travel details</h2><p class="small mute" style="margin-top:-6px">Flights, stays, cars, car services and reservations, with confirmation numbers and contacts.</p>
+  ${(t.bookings||[]).map((b,i)=>{const T=BTYPES[b.type]||BTYPES.other;return `<details class="bk" data-bk="${esc(b.id)}"${openBk.has(b.id)?' open':''}><summary><span class="ty">${T.one}</span><span class="sp"><b>${esc(b.title||'Untitled')}</b><br><span class="small mute">${num(b.from,0)?'Day '+b.from+(T.span&&num(b.to,0)?' → '+b.to:''):'Day not set'}${b.conf?' · '+esc(b.conf):''}</span></span></summary><div class="body g g2">
+    <label>Type<select data-b="bookings.${i}.type" data-r>${Object.entries(BTYPES).map(([k,v])=>`<option value="${k}"${k===b.type?' selected':''}>${v.one}</option>`).join('')}</select></label>
+    <label>${b.type==='flight'?'Route (e.g. Newark → Orlando)':b.type==='stay'?'Hotel / resort / rental':'What'}<input data-b="bookings.${i}.title" value="${esc(b.title)}"></label>
+    <label>Details line<input data-b="bookings.${i}.provider" value="${esc(b.provider)}" placeholder="${b.type==='flight'?'United 1234 · lands 10:05 am':b.type==='stay'?'Check-in 3 pm · check-out 11 am':'Company, room type, party size…'}"></label>
+    <label>Confirmation #<input data-b="bookings.${i}.conf" value="${esc(b.conf)}"></label>
+    <label>${T.span?T.from:'Day'}<select data-b="bookings.${i}.from" data-n data-r>${dayOpts(b.from,T.span)}</select></label>
+    ${T.span?`<label>${T.to}<select data-b="bookings.${i}.to" data-n data-r>${dayOpts(b.to,true)}</select></label>`:''}
+    <label>Time<input type="time" data-b="bookings.${i}.time" value="${esc(b.time)}"></label>
+    <label>Contact phone<input type="tel" data-b="bookings.${i}.phone" value="${esc(b.phone)}"></label>
+    <label>Address<input data-b="bookings.${i}.addr" value="${esc(b.addr)}"></label>
+    <label>Booking link<input type="url" data-b="bookings.${i}.link" value="${esc(b.link)}" placeholder="https://"></label>
+    <label class="full">Notes for the client<textarea data-b="bookings.${i}.notes">${esc(b.notes)}</textarea></label>
+    <div class="full row"><span class="sp"></span><button class="btn sm" data-a="del" data-p="bookings.${i}">${armed==='bookings.'+i?'Tap again to remove':'Remove'}</button></div></div></details>`}).join('')}
+  <div class="row">${Object.entries(BTYPES).map(([k,v])=>`<button class="btn sm" data-a="addbk" data-type="${k}">+ ${v.one}</button>`).join('')}</div></div>
+
+  <div class="card"><h2>Day by day</h2>${t.start?'':`<p class="small mute" style="margin-top:-6px">Set the first day to show dates.</p>`}
+  ${Array.from({length:N},(_,k)=>k+1).map(d=>{const dt=window.AW.dayDate(t,d);const items=(t.plan||{})[d]||[];return `<div class="day"><b>Day ${d}</b> <span class="mute small">${dt?fmt(dt,{weekday:'short',month:'short',day:'numeric'}):''}</span>
+    <div style="margin-top:6px">${items.map((it,j)=>`<div class="it"><input type="time" data-b="plan.${d}.${j}.time" value="${esc(it.time)}" aria-label="Time"><input data-b="plan.${d}.${j}.text" value="${esc(it.text)}" aria-label="Plan"><button class="btn x" data-a="del" data-p="plan.${d}.${j}" aria-label="Remove">✕</button></div>`).join('')}</div>
+    <button class="btn sm" data-a="addplan" data-d="${d}">+ Add to day ${d}</button></div>`}).join('')}</div>
+
+  <div class="card"><h2>Packing list</h2><p class="small mute" style="margin-top:-6px">${t.id?`The family has ticked ${packed} of ${(t.packing||[]).length}.`:'Starts from the kind of trip. Edit anything.'}</p>
+  ${lists.map(l=>`<div class="day"><div class="row"><b class="sp">${esc(l)}</b><button class="btn sm" data-a="dellist" data-l="${esc(l)}">${armed==='list:'+l?'Tap again to remove list':'Remove list'}</button></div><div style="margin-top:6px">${(t.packing||[]).map((it,j)=>it.list!==l?'':`<div class="pkl"><input data-b="packing.${j}.text" value="${esc(it.text)}" aria-label="Item"><button class="btn x" data-a="del" data-p="packing.${j}" aria-label="Remove">✕</button></div>`).join('')}</div><button class="btn sm" data-a="additem" data-l="${esc(l)}">+ Item</button></div>`).join('')}
+  <div class="day row"><input id="newList" placeholder="New list (e.g. Kids, Grandma)" style="flex:1 1 200px" aria-label="New list name"><button class="btn sm" data-a="addlist">Add list</button>
+  <select id="tpl" style="flex:1 1 200px" aria-label="Add a ready-made list"><option value="">Add a ready-made list…</option>${Object.entries(TEMPLATES).filter(([k,[n]])=>!lists.includes(n)).map(([k,[n]])=>`<option value="${k}">${esc(n)}</option>`).join('')}</select></div></div>
+
+  ${t.id?`<div class="card"><h2>Delete trip</h2><p class="small mute" style="margin-top:-6px">Removes the trip and its client page for good.</p><button class="btn" data-a="deltrip">${armed==='deltrip'?'Tap again to delete forever':'Delete this trip'}</button></div>`:''}`;
+  $('#main').innerHTML=h;
+}
+function setSaveMsg(m){$('#saveMsg').textContent=m||(dirty?'Unsaved changes':DEMO?'Saved on this device':'All changes saved')}
+function setPath(o,p,v){const k=p.split('.');let x=o;for(let i=0;i<k.length-1;i++){x=x[k[i]]??(x[k[i]]={})}x[k[k.length-1]]=v}
+function getPath(o,p){return p.split('.').reduce((x,k)=>x==null?x:x[k],o)}
+function delPath(o,p){const k=p.split('.'),last=k.pop(),par=getPath(o,k.join('.'));if(Array.isArray(par))par.splice(+last,1);else if(par)delete par[last]}
+function keepOpen(){document.querySelectorAll('details.bk').forEach(d=>{if(d.open)openBk.add(d.dataset.bk);else openBk.delete(d.dataset.bk)})}
+function redraw(){keepOpen();const y=scrollY;drawEdit();scrollTo(0,y)}
+
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){q=e.target.value;const pos=e.target.selectionStart;drawList();const n=$('#q');n.focus();n.setSelectionRange(pos,pos);return}
+  const p=e.target.dataset.b;if(!p||!draft)return;
+  let v=e.target.value;if('n' in e.target.dataset)v=num(v,0);
+  setPath(draft,p,v);dirty=true;setSaveMsg();
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='tpl'&&draft){const k=e.target.value;if(!k)return;const [n,items]=TEMPLATES[k];draft.packing.push(...items.map(text=>({id:uid(),list:n,text})));dirty=true;redraw();return}
+  const p=e.target.dataset.b;if(!p||!draft||!('r' in e.target.dataset))return;
+  if(p==='kind'&&!draft.id){draft.packing=packingFor(draft.kind)}
+  if(p==='days'){const N=Math.max(1,Math.min(60,num(draft.days,1)));draft.days=N;draft.travelers.forEach(g=>{g.from=Math.min(Math.max(1,num(g.from,1)),N);g.to=Math.min(Math.max(g.from,num(g.to,N)),N)})}
+  redraw();
+});
+document.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('details.bk')){if(e.target.open)openBk.add(e.target.dataset.bk);else openBk.delete(e.target.dataset.bk)}},true);
+
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+  const wasArmed=armed;if(!['del','dellist','deltrip','back'].includes(a)||el.dataset.p===undefined&&a==='del')armed=null;
+  switch(a){
+    case 'logout':ls.del('aw-key');ss.del('aw-key');key='';loginView();break;
+    case 'list':listView();break;
+    case 'new':editView(null);break;
+    case 'edit':editView(el.dataset.id);break;
+    case 'back':if(dirty&&wasArmed!=='back'){armed='back';el.textContent='Unsaved changes. Tap again to leave';return}armed=null;listView();break;
+    case 'newpin':draft.pin=String(1000+Math.floor(Math.random()*9000));dirty=true;redraw();break;
+    case 'addtrav':draft.travelers.push({id:uid(),label:'Group '+(draft.travelers.length+1),who:'',count:2,from:1,to:num(draft.days,1)});dirty=true;redraw();break;
+    case 'addbk':{const b={id:uid(),type:el.dataset.type,title:'',provider:'',conf:'',from:0,to:0,time:'',phone:'',addr:'',link:'',notes:''};draft.bookings.push(b);openBk.add(b.id);dirty=true;redraw();setTimeout(()=>{const d=document.querySelector(`details[data-bk="${b.id}"]`);d&&d.scrollIntoView({block:'center'});d&&d.querySelector('[data-b$=".title"]').focus()},30);break}
+    case 'addplan':{const d=el.dataset.d;(draft.plan[d]=draft.plan[d]||[]).push({id:uid(),time:'',text:''});dirty=true;redraw();const ins=document.querySelectorAll(`[data-b^="plan.${d}."][data-b$=".text"]`);ins.length&&ins[ins.length-1].focus();break}
+    case 'additem':{draft.packing.push({id:uid(),list:el.dataset.l,text:''});dirty=true;redraw();const ins=[...document.querySelectorAll('[data-b^="packing."]')];const last=ins.find(i=>i.dataset.b==='packing.'+(draft.packing.length-1)+'.text');last&&last.focus();break}
+    case 'addlist':{const n=($('#newList').value||'').trim();if(!n)return;draft.packing.push({id:uid(),list:n,text:''});dirty=true;redraw();break}
+    case 'dellist':{const l=el.dataset.l;if(wasArmed!=='list:'+l){armed='list:'+l;redraw();return}armed=null;draft.packing=draft.packing.filter(i=>i.list!==l);dirty=true;redraw();break}
+    case 'del':{const p=el.dataset.p;if(p.startsWith('bookings.')&&wasArmed!==p){armed=p;redraw();return}armed=null;delPath(draft,p);dirty=true;redraw();break}
+    case 'deltrip':if(wasArmed!=='deltrip'){armed='deltrip';redraw();return}armed=null;busy(1);try{await S.del(draft.id);toast('Trip deleted')}catch(err){toast(err.message)}busy(0);listView();break;
+    case 'save':await save();break;
+    case 'preview':{if(dirty){const ok=await save();if(!ok)return}window.open(linkFor(draft),'_blank');break}
+    case 'share':{let t=draft&&draft.id===el.dataset.id?draft:trips.find(x=>x.id===el.dataset.id);if(!t)return;if(draft&&dirty){const ok=await save();if(!ok)return;t=draft}shareDlg(t);break}
+    case 'copy':{const txt=$('#shareTxt').value;try{await navigator.clipboard.writeText(txt);el.textContent='Copied'}catch(err){$('#shareTxt').select();el.textContent='Press copy'}break}
+    case 'close':$('#dlg').close();break;
+  }
+});
+async function save(){
+  if(!draft)return false;
+  if(!(draft.client||'').trim()){toast('Add the client name first');return false}
+  draft.plan=Object.fromEntries(Object.entries(draft.plan||{}).filter(([d])=>num(d,0)<=num(draft.days,1)).map(([d,a])=>[d,a.filter(i=>(i.text||'').trim())]));
+  draft.packing=(draft.packing||[]).filter(i=>(i.text||'').trim());
+  setSaveMsg('Saving…');busy(1);
+  try{const tk=draft.ticks;const saved=await S.save(draft);draft.id=saved.id;draft.pin=saved.pin;draft.ticks=tk;dirty=false;busy(0);toast('Saved');redraw();
+    const i=trips.findIndex(t=>t.id===draft.id);const row={id:draft.id,pin:draft.pin,client:draft.client,title:draft.title,dest:draft.dest,start:draft.start,days:draft.days,status:draft.status};if(i<0)trips.push(row);else trips[i]=row;return true}
+  catch(err){busy(0);setSaveMsg('Not saved');toast(err.message);return false}
+}
+function shareDlg(t){
+  $('#dlgBody').innerHTML=`<h2>Send to ${esc(t.client||'client')}</h2><p class="small mute" style="margin:0">Paste this into a text, WhatsApp or email.</p>
+  <textarea id="shareTxt" rows="9" readonly>${esc(shareText(t))}</textarea>
+  <div class="row"><a class="btn sm" href="${esc(linkFor(t))}" target="_blank" rel="noopener">Open their page</a><span class="sp"></span><button class="btn" data-a="close">Done</button><button class="btn gold" data-a="copy">Copy message</button></div>`;
+  $('#dlg').showModal();
+}
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+if(DEMO||key)listView();else loginView();
+}
+</script>
+</body>
+</html>
