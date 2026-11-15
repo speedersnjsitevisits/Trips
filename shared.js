@@ -68,7 +68,7 @@
         1: [{ id: 'p1', time: '10:05', text: 'Land in Orlando, pick up the car' }, { id: 'p2', time: '15:00', text: 'Check in, pool afternoon' }],
         2: [{ id: 'p3', time: '08:00', text: 'Magic Kingdom, rope drop' }, { id: 'p4', time: '', text: 'Grandparents arrive in the afternoon' }],
         3: [{ id: 'p5', time: '09:00', text: 'EPCOT' }],
-        4: [{ id: 'p6', time: '08:30', text: 'Character breakfast' }, { id: 'p7', time: '', text: 'Hollywood Studios' }],
+        4: [{ id: 'p7', time: '10:30', text: 'Hollywood Studios' }],
         5: [{ id: 'p8', time: '', text: 'Rest day, the rest of the family arrives' }],
         6: [{ id: 'p9', time: '08:30', text: 'Animal Kingdom' }],
         7: [{ id: 'p10', time: '', text: 'Magic Kingdom with everyone' }],
