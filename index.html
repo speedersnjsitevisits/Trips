@@ -73,7 +73,7 @@ h3{font:600 20px/1.2 'Cormorant Garamond',serif;margin:18px 0 6px}
 .sig{font-size:40px;line-height:1;margin-top:6px}
 /* crew */
 .tl{display:grid;gap:5px 3px;align-items:center;margin-top:8px}
-.tl .lab{font-size:13px;line-height:1.2;overflow:hidden}.tl .lab small{display:block;color:var(--mute)}
+.tl .lab{grid-column:1;font-size:13px;line-height:1.2;overflow:hidden}.tl .lab small{display:block;color:var(--mute)}
 .tl .dh{text-align:center;font-size:12px;color:var(--mute)}
 .tl .seg{height:26px;border-radius:7px;background:linear-gradient(120deg,#b8934a,var(--gold2))}
 .tl .seg.s2{background:linear-gradient(120deg,#3b4380,#6470b8)}.tl .seg.s3{background:linear-gradient(120deg,#8a5a7a,#c58fae)}.tl .seg.s4{background:linear-gradient(120deg,#3c7d77,#78b8ae)}
@@ -285,7 +285,10 @@ function overview(t,ph){
   }else{
     h+=`<div class="card cdwrap"><div class="big foil">Welcome home</div><p style="color:#c9c4d9;margin:10px 0 0">We hope ${esc(t.title||'the trip')} was everything you dreamed of.</p><div class="btns" style="justify-content:center"><a class="btn gold" href="#review">${myReview?'See your review':'Share how it went'}</a></div></div>`;
   }
-  if(t.message)h+=`<div class="card"><p class="note serif" style="font-size:20px;margin:0">${esc(t.message)}</p><div class="sig script foil">${esc((A.name||'').split(' ')[0])}</div></div>`;
+  const DEF={during:`Have the best time today! If anything comes up, big or small, I\u2019m just a message away.`,
+    after:`Welcome home! Thank you for trusting me with ${t.title||'this trip'}. I hope it was everything you dreamed of. I\u2019d love to hear all about it, and I\u2019m here whenever you\u2019re ready for the next adventure.`};
+  const note=ph==='before'?t.message:ph==='during'?(t.messageDuring||DEF.during):(t.messageAfter||DEF.after);
+  if(note)h+=`<div class="card"><p class="note serif" style="font-size:20px;margin:0">${esc(note)}</p><div class="sig script foil">${esc((A.name||'').split(' ')[0])}</div></div>`;
   const tr=t.travelers||[];
   if(tr.length){
     const N=num(t.days,1);

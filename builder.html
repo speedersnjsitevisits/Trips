@@ -169,7 +169,9 @@ function drawEdit(){
     <label>Number of days<input type="number" min="1" max="60" data-b="days" data-r data-n value="${N}"></label>
     <label>Status<select data-b="status">${['Planning','Booked','Traveling','Complete'].map(s=>`<option${s===(t.status||'Planning')?' selected':''}>${s}</option>`).join('')}</select></label>
     <label>Family code (clients enter this)<div class="row" style="flex-wrap:nowrap"><input data-b="pin" inputmode="numeric" value="${esc(t.pin||'')}" placeholder="Made on save"><button type="button" class="btn sm" data-a="newpin">New</button></div></label>
-    <label class="full">Personal note on their page<textarea data-b="message" placeholder="I’m so excited for you…">${esc(t.message)}</textarea></label>
+    <label class="full">Your note before the trip<textarea data-b="message" placeholder="I’m so excited for you…">${esc(t.message)}</textarea></label>
+    <label class="full">Note while they’re traveling (leave blank for the default)<textarea data-b="messageDuring" placeholder="Have the best time today! If anything comes up, big or small, I’m just a message away.">${esc(t.messageDuring)}</textarea></label>
+    <label class="full">Welcome-home note (leave blank for the default)<textarea data-b="messageAfter" placeholder="Welcome home! Thank you for trusting me with this trip. I’d love to hear all about it, and I’m here whenever you’re ready for the next adventure.">${esc(t.messageAfter)}</textarea></label>
     <label class="full">Private notes (only you see these)<textarea data-b="privateNotes" placeholder="Deposits, preferences, commission…">${esc(t.privateNotes)}</textarea></label>
   </div></div>
 
