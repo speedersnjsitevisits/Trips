@@ -22,7 +22,7 @@
 [hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.55 Jost,system-ui,sans-serif;overflow-x:clip}
-a{color:inherit}button,input{font:inherit;color:inherit}button{cursor:pointer}
+a{color:inherit}button,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
 .script{font-family:Allura,cursive;font-weight:400}
 .serif{font-family:'Cormorant Garamond',Georgia,serif}
 .foil{background:linear-gradient(100deg,#b8934a,var(--gold2) 45%,#c9a456 70%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -35,7 +35,7 @@ a{color:inherit}button,input{font:inherit;color:inherit}button{cursor:pointer}
 .bname{position:relative;font-size:clamp(34px,9vw,50px);line-height:1;text-align:center;padding:0 12px}
 .under{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:12px auto 0;transition:width 2s ease .8s}
 .bcard.in .under{width:60%}
-.welcome{margin-top:26px;text-align:center;color:var(--gold2);opacity:0;transition:opacity 1.4s ease 1.8s;min-height:60px}
+.welcome{margin-top:26px;text-align:center;color:var(--gold2);opacity:0;transition:opacity 1.6s ease;min-height:60px}
 .welcome.in{opacity:1}
 .welcome .serif{font-size:26px;line-height:1.2}
 .welcome small{display:block;letter-spacing:.04em;color:#c9c4d9;font-size:14px;margin-top:4px}
@@ -66,9 +66,9 @@ h3{font:600 20px/1.2 'Cormorant Garamond',serif;margin:18px 0 6px}
 .cdwrap{background:var(--navy);color:#fff;border:0;text-align:center;padding:26px 14px}
 .cdl{color:#c9c4d9;letter-spacing:.04em}
 .cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px auto 8px;max-width:520px}
-.cd b{display:block;font:600 clamp(40px,12vw,74px)/1 'Cormorant Garamond',serif;font-variant-numeric:tabular-nums}
+.cd b{display:block;font:600 clamp(40px,12vw,74px)/1 'Cormorant Garamond',serif;font-variant-numeric:lining-nums tabular-nums}
 .cd span{font-size:13px;color:#c9c4d9}
-.big{font:600 clamp(44px,12vw,72px)/1 'Cormorant Garamond',serif}
+.big{font:600 clamp(44px,12vw,72px)/1 'Cormorant Garamond',serif;font-variant-numeric:lining-nums}
 .note{white-space:pre-wrap}
 .sig{font-size:40px;line-height:1;margin-top:6px}
 /* crew */
@@ -83,7 +83,15 @@ h3{font:600 20px/1.2 'Cormorant Garamond',serif;margin:18px 0 6px}
 .adv .av{width:56px;height:56px;border-radius:50%;background:var(--navy);display:grid;place-items:center;flex:none;border:1px solid var(--gold)}
 .adv .av span{font:600 22px 'Cormorant Garamond',serif}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;font-weight:500}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-weight:500}
+.stars{display:flex;gap:6px;justify-content:center;margin:14px 0 4px}
+.stars button{background:none;border:0;padding:0;width:48px;height:48px;font-size:40px;line-height:1;color:rgba(216,185,108,.35);transition:transform .15s}
+.stars button.on{color:var(--gold)}
+.stars button:active{transform:scale(.9)}
+.rvf textarea,.rvf input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;font-size:16px;min-height:48px}
+.rvf textarea{min-height:120px;resize:vertical}
+.rvf label{display:grid;gap:6px;margin-top:12px;font-size:14px;color:var(--mute)}
+.quote{font:500 21px/1.4 'Cormorant Garamond',serif;white-space:pre-wrap}
 .btn.gold{background:linear-gradient(120deg,#c7a35a,var(--gold2));color:#1e2242;border:0}
 /* itinerary & bookings */
 .day.today{outline:2px solid var(--gold)}
@@ -116,7 +124,7 @@ h3{font:600 20px/1.2 'Cormorant Garamond',serif;margin:18px 0 6px}
 .demo button.on{background:var(--gold);color:var(--navy)}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @media(max-width:520px){.tl .lab{font-size:11px}.cd b{font-size:40px}}
-@media(prefers-reduced-motion:reduce){#intro,.bcard,.under,.welcome,.prog i{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.bcard{transform:none!important}.prog i{transition:none}}
 </style>
 <script src="config.js"></script>
 <script src="shared.js"></script>
@@ -153,13 +161,17 @@ const $=s=>document.querySelector(s);
 const q=new URLSearchParams(location.search);
 const id=q.get('t')||'';
 const DEMO=!C.API_URL||!id||id==='demo';
-let trip=null, ticks={}, pin='', view='overview', forced=null, cdTimer=null, wxCache={};
+let trip=null, ticks={}, myReview=null, draftStars=0, pin='', view='overview', forced=null, cdTimer=null, wxCache={};
 
 /* ---------- intro ---------- */
 $('#mono').textContent=A.monogram||'NH';
 const intro=$('#intro'), card=$('#bcard'), wel=$('#welcome');
 let introDone=false, introReady=false;
-requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('in')));
+let began=0, pendingTrip=null;
+function begin(){ if(began)return; began=Date.now(); card.classList.add('in'); if(pendingTrip){const t=pendingTrip;pendingTrip=null;playWelcome(t)} }
+/* wait for the script font (max 1.5s) so the card never animates in an unstyled font */
+const fontsOk=document.fonts&&document.fonts.load?Promise.race([Promise.all([document.fonts.load('40px Allura'),document.fonts.load('600 40px "Cormorant Garamond"')]),new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+fontsOk.then(()=>setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(begin)),150),()=>begin());
 function welcomeText(t){return `<div class="serif">Welcome, ${esc(t.client||'friends')}</div><small>${esc(t.title||'')}${t.start?' · '+fmt(parseD(t.start),{month:'long',day:'numeric',year:'numeric'}):''}</small>`}
 function finishIntro(){
   if(introDone||!introReady)return;introDone=true;
@@ -168,12 +180,13 @@ function finishIntro(){
 }
 intro.addEventListener('click',e=>{if(e.target.closest('.pinbox'))return;finishIntro()});
 function playWelcome(t){
-  wel.innerHTML=welcomeText(t);
-  requestAnimationFrame(()=>wel.classList.add('in'));
+  if(!began){pendingTrip=t;return}
   introReady=true;
   const seen=ls.get('aw-seen-'+(t.id||id));ls.set('aw-seen-'+(t.id||id),1);
-  const reduce=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
-  setTimeout(finishIntro,reduce?1500:seen?4000:7000);
+  const total=seen?5000:8500;                 /* how long the opening stays up */
+  const since=Date.now()-began;
+  setTimeout(()=>{wel.innerHTML=welcomeText(t);requestAnimationFrame(()=>requestAnimationFrame(()=>wel.classList.add('in')))},Math.max(0,1600-since));
+  setTimeout(finishIntro,Math.max(total-since,3500));
 }
 function askPin(msg){
   $('#skip').textContent='';
@@ -186,13 +199,13 @@ function askPin(msg){
 
 /* ---------- data ---------- */
 async function load(){
-  if(DEMO){const all=ls.get('aw-demo-trips')||{};trip=(id&&all[id])||(all.demo)||sampleTrip();ticks=ls.get('aw-ticks-'+(trip.id||'demo'))||{};start();return}
+  if(DEMO){const all=ls.get('aw-demo-trips')||{};trip=(id&&all[id])||(all.demo)||sampleTrip();ticks=ls.get('aw-ticks-'+(trip.id||'demo'))||{};myReview=ls.get('aw-review-'+(trip.id||'demo'));start();return}
   pin=pin||ls.get('aw-pin-'+id)||'';
   if(!pin){askPin();return}
   try{
     const j=await apiGet({action:'trip',id,pin});
     if(!j.ok){ if(j.error==='pin'){ls.del('aw-pin-'+id);pin='';askPin('That code didn’t match. Check the message from your advisor.')} else {wel.innerHTML=`<div class="serif">We couldn’t find this trip</div><small>Please use the link your advisor sent you.</small>`;wel.classList.add('in')} return}
-    ls.set('aw-pin-'+id,pin);trip=j.trip;ticks=j.ticks||{};start();
+    ls.set('aw-pin-'+id,pin);trip=j.trip;ticks=j.ticks||{};myReview=j.review||null;start();
   }catch(e){
     const cached=ls.get('aw-trip-'+id);
     if(cached){trip=cached;ticks=ls.get('aw-ticks-'+id)||{};start(true);return}
@@ -229,7 +242,7 @@ function todayN(t){
 }
 
 /* ---------- render ---------- */
-const TABS=[['overview','Overview'],['itinerary','Itinerary'],['travel','Travel info'],['packing','Packing'],['weather','Weather'],['review','Review']];
+const TABS=[['overview','Overview','bda'],['itinerary','Itinerary','bda'],['travel','Travel','bda'],['packing','Packing','bd'],['weather','Weather','bd'],['review','Review','a']];
 function render(){
   const t=trip, ph=phase(t);
   $('#title').textContent=t.title||'Your trip';
@@ -237,7 +250,7 @@ function render(){
   $('#sub').textContent=[t.client,s?`${fmt(s,{month:'short',day:'numeric'})} – ${fmt(e,{month:'short',day:'numeric',year:'numeric'})}`:'',t.dest].filter(Boolean).join(' · ');
   $('#callTop').href=A.whatsapp?`https://wa.me/${A.whatsapp}`:`sms:${A.phone||''}`;
   $('#callTop').textContent=`Message ${(A.name||'your advisor').split(' ')[0]}`;
-  const tabs=TABS.filter(([k])=>k!=='review'||ph==='after');
+  const tabs=TABS.filter(x=>x[2].includes(ph[0]));
   if(!tabs.some(([k])=>k===view))view='overview';
   $('#tabs').innerHTML=tabs.map(([k,n])=>`<a href="#${k}" class="${k===view?'on':''}">${n}</a>`).join('');
   const V={overview,itinerary,travel,packing,weather,review};
@@ -270,7 +283,7 @@ function overview(t,ph){
     h+=`<div class="card cdwrap"><div class="cdl">Today</div><div class="big foil">Day ${n} of ${t.days}</div><div class="sm" style="color:#c9c4d9;margin-top:6px">${fmt(dayDate(t,n),{weekday:'long',month:'long',day:'numeric'})}</div></div>
     <div class="card"><h2>Today’s plan</h2>${items.length?`<ul class="plan">${items.map(i=>`<li><span class="t">${t12(i.time)||'Any time'}</span><span>${esc(i.text)}</span></li>`).join('')}</ul>`:'<p class="mute">A free day. Enjoy it.</p>'}${stay&&n<t.days?`<p class="sm mute">Tonight: ${esc(stay.title)}</p>`:''}</div>`;
   }else{
-    h+=`<div class="card cdwrap"><div class="big foil">Welcome home</div><p style="color:#c9c4d9;margin:10px 0 0">We hope ${esc(t.title||'the trip')} was everything you dreamed of.</p><div class="btns" style="justify-content:center"><a class="btn gold" href="#review">Share how it went</a></div></div>`;
+    h+=`<div class="card cdwrap"><div class="big foil">Welcome home</div><p style="color:#c9c4d9;margin:10px 0 0">We hope ${esc(t.title||'the trip')} was everything you dreamed of.</p><div class="btns" style="justify-content:center"><a class="btn gold" href="#review">${myReview?'See your review':'Share how it went'}</a></div></div>`;
   }
   if(t.message)h+=`<div class="card"><p class="note serif" style="font-size:20px;margin:0">${esc(t.message)}</p><div class="sig script foil">${esc((A.name||'').split(' ')[0])}</div></div>`;
   const tr=t.travelers||[];
@@ -333,9 +346,32 @@ function packing(t){
 
 function review(t){
   const first=(A.name||'').split(' ')[0]||'your advisor';
-  return `<div class="card cdwrap"><div class="big foil" style="font-size:44px">How was it?</div><p style="color:#c9c4d9">${esc(first)} would love to hear about your trip. A short review helps other families find her.</p>
-  <div class="btns" style="justify-content:center">${A.reviewUrl?`<a class="btn gold" href="${esc(A.reviewUrl)}" target="_blank" rel="noopener">Leave a review</a>`:''}${A.whatsapp?`<a class="btn" href="https://wa.me/${esc(A.whatsapp)}?text=${encodeURIComponent('Hi '+first+'! Here are some favorite photos from '+(t.title||'our trip')+':')}">Send ${esc(first)} a photo</a>`:''}${A.email?`<a class="btn" href="mailto:${esc(A.email)}?subject=${encodeURIComponent('Our trip: '+(t.title||''))}">Email ${esc(first)}</a>`:''}</div></div>
-  <div class="card"><h2>Planning the next one?</h2><p>${esc(first)} can start on your next trip whenever you’re ready.</p><div class="btns">${A.website?`<a class="btn" href="${esc(A.website)}" target="_blank" rel="noopener">Visit ${esc(A.business)}</a>`:''}</div></div>`;
+  const starRow=(n,interactive)=>`<div class="stars"${interactive?' role="radiogroup" aria-label="Rating"':''}>${[1,2,3,4,5].map(i=>interactive?`<button type="button" data-star="${i}" class="${i<=n?'on':''}" aria-label="${i} star${i>1?'s':''}">★</button>`:`<span style="font-size:30px;color:${i<=n?'var(--gold)':'rgba(216,185,108,.3)'}">★</span>`).join('')}</div>`;
+  let h='';
+  if(myReview){
+    h+=`<div class="card cdwrap"><div class="big foil" style="font-size:42px">Thank you</div>${starRow(myReview.stars)}<p style="color:#c9c4d9;margin:6px 0 0">${esc(first)} has your review. It means the world to a small business.</p></div>
+    ${myReview.text?`<div class="card"><p class="quote" style="margin:0">“${esc(myReview.text)}”</p>${myReview.name?`<p class="mute sm" style="margin:8px 0 0">${esc(myReview.name)}</p>`:''}</div>`:''}`;
+    if(A.reviewUrl&&myReview.stars>=4)h+=`<div class="card"><h2>Would you post it on Google too?</h2><p>It helps other families find ${esc(first)}. Tap below to copy your words, then paste them in.</p><div class="btns"><button class="btn gold" data-share-review>Copy & open Google</button></div></div>`;
+    h+=`<div class="card"><div class="dhd"><span>Want to change something?</span><button class="btn" data-edit-review>Edit review</button></div></div>`;
+  }else{
+    if(!draftStars)draftStars=0;
+    h+=`<div class="card cdwrap"><div class="big foil" style="font-size:42px">How was it?</div><p style="color:#c9c4d9;margin:8px 0 0">Tap to rate your trip with ${esc(first)}.</p>${starRow(draftStars,true)}</div>
+    <form class="card rvf" id="rvf"><h2>Tell ${esc(first)} about it</h2>
+      <label>What was the best part of your trip?<textarea name="text" placeholder="The moment the kids saw the castle…"></textarea></label>
+      <label>Your name, as you’d like it shown<input name="name" value="${esc(t.client||'')}" autocomplete="name"></label>
+      <div class="btns"><button class="btn gold" style="flex:1">Send review</button></div><p class="err" id="rverr" style="color:#b3402a" hidden></p></form>`;
+  }
+  h+=`<div class="card"><h2>Planning the next one?</h2><p>${esc(first)} can start on your next trip whenever you’re ready.</p><div class="btns">${A.website?`<a class="btn" href="${esc(A.website)}" target="_blank" rel="noopener">Visit ${esc(A.business)}</a>`:''}${A.whatsapp?`<a class="btn" href="https://wa.me/${esc(A.whatsapp)}">Message ${esc(first)}</a>`:''}</div></div>`;
+  return h;
+}
+async function submitReview(f){
+  const err=$('#rverr');err.hidden=true;
+  if(!draftStars){err.textContent='Tap the stars to choose a rating first.';err.hidden=false;return}
+  const rv={stars:draftStars,text:f.text.value.trim(),name:f.name.value.trim()};
+  const btn=f.querySelector('button.gold');btn.disabled=true;btn.textContent='Sending…';
+  if(DEMO){myReview={...rv,date:new Date().toISOString()};ls.set('aw-review-'+(trip.id||'demo'),myReview);render();scrollTo(0,0);return}
+  try{const j=await api({action:'review',id,pin,review:rv});myReview=j.review;render();scrollTo(0,0)}
+  catch(e){btn.disabled=false;btn.textContent='Send review';err.textContent='That didn’t send. Check your connection and try again.';err.hidden=false}
 }
 
 /* ---------- weather (Open-Meteo, free, no key) ---------- */
@@ -380,7 +416,12 @@ async function loadWeather(t){
 
 /* ---------- events ---------- */
 window.addEventListener('hashchange',()=>{view=(location.hash||'#overview').slice(1);if(trip){render();scrollTo(0,0)}});
+document.addEventListener('submit',e=>{if(e.target.id==='rvf'){e.preventDefault();submitReview(e.target)}});
 document.addEventListener('click',e=>{
+  const st=e.target.closest('[data-star]');
+  if(st){draftStars=+st.dataset.star;document.querySelectorAll('[data-star]').forEach(b=>b.classList.toggle('on',+b.dataset.star<=draftStars));return}
+  if(e.target.closest('[data-edit-review]')){draftStars=myReview.stars;const keep=myReview;myReview=null;render();const f=$('#rvf');if(f){f.text.value=keep.text||'';f.name.value=keep.name||''}return}
+  if(e.target.closest('[data-share-review]')){const txt=myReview.text||'';(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{}).finally(()=>{location.href=A.reviewUrl});return}
   const c=e.target.closest('[data-copy]');
   if(c){navigator.clipboard?.writeText(c.dataset.copy).then(()=>{c.textContent='Copied'},()=>{c.textContent='Hold to copy'})}
 });

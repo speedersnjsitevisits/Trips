@@ -25,7 +25,7 @@ button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}a{
 header{background:var(--navy);color:#fff}
 .wrap{max-width:900px;margin:0 auto;padding:0 max(4vw,16px)}
 .top{display:flex;align-items:center;gap:10px;padding-top:16px;padding-bottom:16px;flex-wrap:wrap}
-.top .script{font-size:32px;line-height:1}
+.top .script{font-size:32px;line-height:1.1;padding-right:6px}
 .top .t{color:#c9c4d9;font-size:14px;flex:1}
 main.wrap{padding-top:20px;padding-bottom:120px}
 h1{font:600 clamp(30px,6vw,42px)/1.05 'Cormorant Garamond',serif;margin:0}
@@ -91,9 +91,9 @@ let key=ss.get('aw-key')||ls.get('aw-key')||'', trips=[], draft=null, dirty=fals
 /* ---------- store ---------- */
 const demoAll=()=>{let t=ls.get('aw-demo-trips');if(!t){const s=sampleTrip();delete s.sample;s.id='demo';t={demo:s};ls.set('aw-demo-trips',t)}return t};
 const S={
-  async list(){if(DEMO)return Object.values(demoAll()).map(t=>({id:t.id,pin:t.pin,client:t.client,title:t.title,dest:t.dest,start:t.start,days:t.days,status:t.status}));return (await api({action:'list',key})).trips},
-  async get(id){if(DEMO){const t=JSON.parse(JSON.stringify(demoAll()[id]));t.ticks=ls.get('aw-ticks-'+(id==='demo'?'demo':id))||{};return t}return (await api({action:'get',key,id})).trip},
-  async save(t){const c=JSON.parse(JSON.stringify(t));delete c.ticks;if(DEMO){const all=demoAll();if(!c.id)c.id=Math.random().toString(36).slice(2,14);if(!c.pin)c.pin=String(1000+Math.floor(Math.random()*9000));all[c.id]=c;ls.set('aw-demo-trips',all);return c}return (await api({action:'save',key,trip:c})).trip},
+  async list(){if(DEMO)return Object.values(demoAll()).map(t=>({id:t.id,pin:t.pin,client:t.client,title:t.title,dest:t.dest,start:t.start,days:t.days,status:t.status,stars:(ls.get('aw-review-'+t.id)||{}).stars||0}));return (await api({action:'list',key})).trips},
+  async get(id){if(DEMO){const t=JSON.parse(JSON.stringify(demoAll()[id]));t.ticks=ls.get('aw-ticks-'+(id==='demo'?'demo':id))||{};t.review=ls.get('aw-review-'+id);return t}return (await api({action:'get',key,id})).trip},
+  async save(t){const c=JSON.parse(JSON.stringify(t));delete c.ticks;delete c.review;if(DEMO){const all=demoAll();if(!c.id)c.id=Math.random().toString(36).slice(2,14);if(!c.pin)c.pin=String(1000+Math.floor(Math.random()*9000));all[c.id]=c;ls.set('aw-demo-trips',all);return c}return (await api({action:'save',key,trip:c})).trip},
   async del(id){if(DEMO){const all=demoAll();delete all[id];ls.set('aw-demo-trips',all);return}await api({action:'delete',key,id})}
 };
 const linkFor=t=>new URL('index.html?t='+encodeURIComponent(t.id),location.href).href;
@@ -131,7 +131,7 @@ function drawList(){
     const dleft=s?Math.round((s-today)/864e5):null;
     return `<div class="card tc"><div><div class="nm">${esc(t.client||'Unnamed client')}<span class="st ${esc(st)}">${esc(st)}</span></div>
     <div>${esc(t.title||'Untitled trip')}${t.dest?' · '+esc(t.dest):''}</div>
-    <div class="small mute">${s?`${fmt(s,{month:'short',day:'numeric',year:'numeric'})} · ${t.days} days${dleft>0?` · in ${dleft} days`:''}`:'Dates not set'}</div></div>
+    <div class="small mute">${s?`${fmt(s,{month:'short',day:'numeric',year:'numeric'})} · ${t.days} days${dleft>0?` · in ${dleft} days`:''}`:'Dates not set'}${t.stars?` · <span style="color:#b8934a">${'★'.repeat(t.stars)}</span> review`:''}</div></div>
     <div class="row" style="justify-content:flex-end"><button class="btn sm" data-a="share" data-id="${esc(t.id)}">Send</button><button class="btn sm gold" data-a="edit" data-id="${esc(t.id)}">Open</button></div></div>`};
   const sec=(n,arr)=>arr.length?`<div class="sec">${n}</div>${arr.map(card).join('')}`:'';
   $('#main').innerHTML=`${DEMO?`<div class="banner">Preview mode: trips save on this device only. Connect Google in config.js to go live.</div>`:''}
@@ -156,6 +156,9 @@ function drawEdit(){
   const lists=[...new Set((t.packing||[]).map(i=>i.list))];
   let h=`<div class="row" style="margin-bottom:12px"><button class="btn sm" data-a="back">← All clients</button><span class="sp"></span>${t.id?`<button class="btn sm" data-a="share" data-id="${esc(t.id)}">Send to client</button>`:''}</div>
   <h1 style="margin-bottom:14px">${esc(t.client||'New trip')}</h1>
+  ${t.review?`<div class="card" style="border-color:var(--gold)"><div class="row"><h2 class="sp" style="margin:0">Their review</h2><span style="color:#b8934a;font-size:22px">${'★'.repeat(t.review.stars)}<span style="opacity:.3">${'★'.repeat(5-t.review.stars)}</span></span></div>
+    ${t.review.text?`<p class="serif" style="font-size:20px;margin:10px 0 4px;white-space:pre-wrap">“${esc(t.review.text)}”</p>`:''}<div class="small mute">${esc(t.review.name||'')}${t.review.date?' · '+fmt(new Date(t.review.date),{month:'short',day:'numeric',year:'numeric'}):''}</div>
+    ${t.review.text?`<div class="row" style="margin-top:10px"><button class="btn sm" data-a="copyrev">Copy as testimonial</button></div>`:''}</div>`:''}
 
   <div class="card"><h2>The basics</h2><div class="g g2">
     <label>Client name, as they’ll be greeted<input data-b="client" value="${esc(t.client)}" placeholder="The Smith Family"></label>
@@ -248,6 +251,7 @@ document.addEventListener('click',async e=>{
     case 'share':{let t=draft&&draft.id===el.dataset.id?draft:trips.find(x=>x.id===el.dataset.id);if(!t)return;if(draft&&dirty){const ok=await save();if(!ok)return;t=draft}shareDlg(t);break}
     case 'copy':{const txt=$('#shareTxt').value;try{await navigator.clipboard.writeText(txt);el.textContent='Copied'}catch(err){$('#shareTxt').select();el.textContent='Press copy'}break}
     case 'close':$('#dlg').close();break;
+    case 'copyrev':{const r=draft.review;const txt=`“${r.text}” — ${r.name||draft.client}`;try{await navigator.clipboard.writeText(txt);el.textContent='Copied'}catch(err){el.textContent='Copy not allowed here'}break}
   }
 });
 async function save(){
