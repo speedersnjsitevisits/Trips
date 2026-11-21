@@ -31,7 +31,7 @@
 
   // type: label, plural heading, whether it spans days, span labels, icon path
   const BTYPES = {
-    flight: { one: 'Flight', many: 'Flights', span: false, icon: '<path d="M2 16l20-6-20-6 4 6-4 6zM6 10h8"/>' },
+    flight: { one: 'Flight', many: 'Flights', span: false, icon: '<path transform="rotate(90 12 12)" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>' },
     stay: { one: 'Stay', many: 'Where you’re staying', span: true, from: 'Check-in', to: 'Check-out', icon: '<path d="M3 18V7M3 13h18v5M21 13a3 3 0 00-3-3h-7v3M7 12a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>' },
     car: { one: 'Rental car', many: 'Rental car', span: true, from: 'Pick-up', to: 'Drop-off', icon: '<path d="M5 16h14M3 16v-4l2-5h14l2 5v4M7 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM3 12h18"/>' },
     transfer: { one: 'Car service', many: 'Car service & transfers', span: false, icon: '<path d="M4 15h16l-2-6H6l-2 6zM4 15v3h3v-3M17 15v3h3v-3M9 6h6"/>' },

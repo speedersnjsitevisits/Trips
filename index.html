@@ -7,10 +7,15 @@
 <meta name="robots" content="noindex">
 <title>Your Trip · Anchor And Wand</title>
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="https://speedersnjsitevisits.github.io/Trips/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Anchor &amp; Wand">
 <meta property="og:site_name" content="Anchor And Wand Travel">
-<meta property="og:image" content="share.png">
+<meta property="og:title" content="Your trip · Anchor And Wand Travel">
+<meta property="og:description" content="Your private trip page from Nicole Henderson, Luxury Travel Advisor.">
+<meta property="og:image" content="https://speedersnjsitevisits.github.io/Trips/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -112,6 +117,14 @@ h3{font:600 20px/1.2 'Cormorant Garamond',serif;margin:18px 0 6px}
 .conf{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;background:var(--bg);border-radius:12px;padding:8px 12px}
 .conf b{font-size:19px;letter-spacing:.08em;font-variant-numeric:tabular-nums}
 .conf button{margin-left:auto;min-height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:0 12px;font-size:14px}
+.gh{color:var(--goldInk)}
+.when{color:var(--goldInk);font-weight:500;font-size:15px;margin-top:2px;font-variant-numeric:tabular-nums}
+.pl{width:1em;height:1em;vertical-align:-.12em;fill:var(--goldInk);margin:0 .15em;transform:rotate(90deg)}
+.addpk{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.addpk input,.addpk select{flex:1 1 160px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:16px;min-height:48px}
+.pk li{display:flex;align-items:center;gap:6px}.pk li label{flex:1}
+.pk .rm{background:none;border:0;color:var(--mute);min-width:44px;min-height:44px;font-size:16px}
+.pk .by{font-size:12px;color:var(--goldInk);margin-left:6px}
 .lk{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:15px}
 /* packing */
 .prog{height:8px;border-radius:8px;background:var(--bg);overflow:hidden;margin:8px 0 2px}.prog i{display:block;height:100%;background:linear-gradient(90deg,#b8934a,var(--gold2));transition:width .3s}
@@ -303,9 +316,11 @@ function overview(t,ph){
     h+=`<div class="card"><h2>Who’s traveling</h2><div class="sm mute">By day of the trip</div><div class="tl" style="grid-template-columns:minmax(64px,120px) repeat(${N},minmax(0,1fr))">${g}</div></div>`;
   }
   const next=(t.bookings||[]).filter(b=>b.type==='flight').sort((a,b)=>num(a.from,0)-num(b.from,0)||byTime(a,b));
-  if(next.length&&ph==='before'){const b=next[0];h+=`<div class="card"><h2>First up</h2><b>${esc(b.title)}</b><div class="mute">Day ${b.from}${dayDate(t,b.from)?' · '+fmt(dayDate(t,b.from)):''}${b.time?' · '+t12(b.time):''}${b.provider?' · '+esc(b.provider):''}</div><div class="btns"><a class="btn" href="#travel">All travel details</a></div></div>`}
+  if(next.length&&ph==='before'){const b=next[0];h+=`<div class="card"><h2>First up</h2><b>${ttl(b)}</b><div class="mute">Day ${b.from}${dayDate(t,b.from)?' · '+fmt(dayDate(t,b.from)):''}${b.time?' · '+t12(b.time):''}${b.provider?' · '+esc(b.provider):''}</div><div class="btns"><a class="btn" href="#travel">All travel details</a></div></div>`}
   return h+advisorCard();
 }
+const PLANE='<svg class="pl" viewBox="0 0 24 24" aria-label="to"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>';
+const ttl=b=>b&&b.type==='flight'?esc(b.title).replace(/\s*(→|-&gt;|=&gt;|–&gt;|—&gt;|➝|➔)\s*/g,' '+PLANE+' '):esc(b?b.title:'');
 const stayOn=(t,d)=>(t.bookings||[]).find(b=>(b.type==='stay'||b.type==='cruise')&&num(b.from,0)<=d&&d<num(b.to,0));
 
 function itinerary(t,ph){
@@ -318,7 +333,7 @@ function itinerary(t,ph){
     h+=`<div class="card day${d===today?' today':''}" id="d${d}"><div class="dhd"><h2 style="margin:0">Day ${d}</h2><span class="mute">${dt?fmt(dt,{weekday:'long',month:'long',day:'numeric'}):''}</span></div>
     <div class="chips">${who.map(x=>`<span class="chip">${esc(x.label)}</span>`).join('')}</div>
     ${arrive.map(x=>`<div class="sm" style="color:var(--goldInk)">${esc(x.label)} arrive today</div>`).join('')}${leave.map(x=>`<div class="sm mute">${esc(x.label)} head home after today</div>`).join('')}
-    <ul class="plan">${bk.map(b=>`<li><span class="t">${t12(b.time)||''}</span><span><b>${esc(BTYPES[b.type]?.one||'')}:</b> ${esc(b.title)}</span></li>`).join('')}${items.map(i=>`<li><span class="t">${t12(i.time)||'Any time'}</span><span>${esc(i.text)}</span></li>`).join('')}</ul>
+    <ul class="plan">${bk.map(b=>`<li><span class="t">${t12(b.time)||''}</span><span><b>${esc(BTYPES[b.type]?.one||'')}:</b> ${ttl(b)}</span></li>`).join('')}${items.map(i=>`<li><span class="t">${t12(i.time)||'Any time'}</span><span>${esc(i.text)}</span></li>`).join('')}</ul>
     ${!bk.length&&!items.length?'<p class="mute sm" style="margin:6px 0 0">Nothing scheduled. Rest, explore, or ask your advisor for ideas.</p>':''}
     ${stay&&d<N?`<p class="sm mute" style="margin:10px 0 0">Tonight: ${esc(stay.title)}</p>`:''}</div>`;
   }
@@ -329,12 +344,12 @@ function travel(t){
   let h=advisorCard();
   Object.entries(BTYPES).forEach(([k,T])=>{
     const list=(t.bookings||[]).filter(b=>b.type===k).sort((a,b)=>num(a.from,0)-num(b.from,0)||byTime(a,b));if(!list.length)return;
-    h+=`<h2 style="margin-top:22px">${T.many}</h2>`+list.map(b=>{
+    h+=`<h2 class="gh" style="margin-top:22px">${T.many}</h2>`+list.map(b=>{
       const a=num(b.from,0),z=num(b.to,0),da=a&&dayDate(t,a),dz=z&&dayDate(t,z);
       const when=!a?'':T.span?`${T.from}: ${da?fmt(da):'day '+a}${b.time?', '+t12(b.time):''} · ${T.to}: ${dz?fmt(dz):'day '+(z||'?')}`:`${da?fmt(da,{weekday:'long',month:'short',day:'numeric'}):'Day '+a}${b.time?' · '+t12(b.time):''}`;
       return `<div class="card bk"><div class="ic"><svg viewBox="0 0 24 24">${T.icon}</svg></div><div>
-      <div class="serif" style="font-size:21px;font-weight:600;line-height:1.15">${esc(b.title)}</div>
-      ${b.provider?`<div>${esc(b.provider)}</div>`:''}<div class="mute sm">${when}</div>
+      <div class="serif" style="font-size:21px;font-weight:600;line-height:1.15">${ttl(b)}</div>
+      ${b.provider?`<div>${esc(b.provider)}</div>`:''}<div class="when">${when}</div>
       ${b.conf?`<div class="conf"><span class="sm mute">Confirmation</span><b>${esc(b.conf)}</b><button data-copy="${esc(b.conf)}">Copy</button></div>`:''}
       ${b.notes?`<p class="note sm" style="margin:8px 0 0">${esc(b.notes)}</p>`:''}
       <div class="lk">${b.phone?`<a href="tel:${esc(b.phone)}">Call ${esc(b.phone)}</a>`:''}${b.addr?`<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.addr)}" target="_blank" rel="noopener">Directions</a>`:''}${b.link?`<a href="${esc(/^https?:/.test(b.link)?b.link:'https://'+b.link)}" target="_blank" rel="noopener">Open booking</a>`:''}</div>
@@ -344,12 +359,21 @@ function travel(t){
   return h;
 }
 
+const extras=()=>Array.isArray(ticks.__extra)?ticks.__extra:[];
+const allItems=t=>(t.packing||[]).concat(extras());
 function packing(t){
-  const items=t.packing||[], lists=[...new Set(items.map(i=>i.list))];
+  const items=allItems(t), lists=[...new Set(items.map(i=>i.list))];
   const done=items.filter(i=>ticks[i.id]).length, pct=items.length?Math.round(done/items.length*100):0;
-  let h=`<div class="card"><div class="dhd"><h2 style="margin:0">Packing list</h2><span class="mute">${done} of ${items.length}</span></div><div class="prog"><i style="width:${pct}%"></i></div><p class="sm mute" style="margin:4px 0 0">${DEMO?'Ticks save on this device in the preview.':'Everyone with this link sees the same ticks.'}</p></div>`;
-  lists.forEach(l=>{h+=`<div class="card"><h3 style="margin-top:0">${esc(l)}</h3><ul class="pk">${items.filter(i=>i.list===l).map(i=>`<li><label><input type="checkbox" data-pk="${esc(i.id)}"${ticks[i.id]?' checked':''}><span class="${ticks[i.id]?'done':''}">${esc(i.text)}</span></label></li>`).join('')}</ul></div>`});
+  let h=`<div class="card"><div class="dhd"><h2 style="margin:0">Packing list</h2><span class="mute" id="pkcount">${done} of ${items.length}</span></div><div class="prog"><i style="width:${pct}%"></i></div><p class="sm mute" style="margin:4px 0 0">${DEMO?'Ticks save on this device in the preview.':'Everyone with this link sees the same list.'}</p></div>`;
+  lists.forEach(l=>{h+=`<div class="card"><h3 style="margin-top:0">${esc(l)}</h3><ul class="pk">${items.filter(i=>i.list===l).map(i=>`<li><label><input type="checkbox" data-pk="${esc(i.id)}"${ticks[i.id]?' checked':''}><span class="${ticks[i.id]?'done':''}">${esc(i.text)}</span>${i.mine?'<span class="by">added by family</span>':''}</label>${i.mine?`<button class="rm" data-rmx="${esc(i.id)}" aria-label="Remove ${esc(i.text)}">✕</button>`:''}</li>`).join('')}</ul></div>`});
+  h+=`<form class="card" id="addpk"><h3 style="margin-top:0">Add something to pack</h3><p class="sm mute" style="margin:0">Anything we missed? Add it here and the whole family will see it.</p>
+    <div class="addpk"><input name="text" placeholder="e.g. Swim goggles" maxlength="80" required aria-label="Item"><select name="list" aria-label="Which list">${[...lists,'Our extras'].filter((x,i,a)=>a.indexOf(x)===i).map(l=>`<option${l==='Our extras'?' selected':''}>${esc(l)}</option>`).join('')}</select><button class="btn gold">Add</button></div></form>`;
   return h;
+}
+async function saveExtra(action,payload){
+  if(DEMO){ls.set('aw-ticks-'+(trip.id||'demo'),ticks);return}
+  ls.set('aw-ticks-'+id,ticks);
+  try{const j=await api(Object.assign({action,id,pin},payload));if(j.ticks)ticks=j.ticks}catch(err){}
 }
 
 function review(t){
@@ -424,12 +448,19 @@ async function loadWeather(t){
 
 /* ---------- events ---------- */
 window.addEventListener('hashchange',()=>{view=(location.hash||'#overview').slice(1);if(trip){render();scrollTo(0,0)}});
-document.addEventListener('submit',e=>{if(e.target.id==='rvf'){e.preventDefault();submitReview(e.target)}});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='rvf'){e.preventDefault();submitReview(e.target);return}
+  if(e.target.id==='addpk'){e.preventDefault();const f=e.target,text=f.text.value.trim();if(!text)return;
+    const item={id:'x'+Math.random().toString(36).slice(2,10),list:f.list.value||'Our extras',text:text.slice(0,80),mine:true};
+    ticks.__extra=extras().concat(item);render();const n=$('#addpk input');n&&n.focus();saveExtra('additem',{item});}
+});
 document.addEventListener('click',e=>{
   const st=e.target.closest('[data-star]');
   if(st){draftStars=+st.dataset.star;document.querySelectorAll('[data-star]').forEach(b=>b.classList.toggle('on',+b.dataset.star<=draftStars));return}
   if(e.target.closest('[data-edit-review]')){draftStars=myReview.stars;const keep=myReview;myReview=null;render();const f=$('#rvf');if(f){f.text.value=keep.text||'';f.name.value=keep.name||''}return}
   if(e.target.closest('[data-share-review]')){const txt=myReview.text||'';(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{}).finally(()=>{location.href=A.reviewUrl});return}
+  const rx=e.target.closest('[data-rmx]');
+  if(rx){const k=rx.dataset.rmx;ticks.__extra=extras().filter(i=>i.id!==k);delete ticks[k];render();saveExtra('delitem',{item:k});return}
   const c=e.target.closest('[data-copy]');
   if(c){navigator.clipboard?.writeText(c.dataset.copy).then(()=>{c.textContent='Copied'},()=>{c.textContent='Hold to copy'})}
 });
@@ -437,9 +468,9 @@ document.addEventListener('change',async e=>{
   const k=e.target.dataset.pk;if(!k)return;const on=e.target.checked;
   if(on)ticks[k]=true;else delete ticks[k];
   e.target.nextElementSibling.classList.toggle('done',on);
-  const items=trip.packing||[],done=items.filter(i=>ticks[i.id]).length;
+  const items=allItems(trip),done=items.filter(i=>ticks[i.id]).length;
   const p=$('.prog i');if(p)p.style.width=(items.length?done/items.length*100:0)+'%';
-  const m=$('.card .dhd .mute');if(m)m.textContent=`${done} of ${items.length}`;
+  const m=$('#pkcount');if(m)m.textContent=`${done} of ${items.length}`;
   if(DEMO){ls.set('aw-ticks-'+(trip.id||'demo'),ticks);return}
   ls.set('aw-ticks-'+id,ticks);
   try{const j=await api({action:'tick',id,pin,item:k,done:on});ticks=j.ticks||ticks}catch(err){}

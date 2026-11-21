@@ -7,10 +7,15 @@
 <meta name="robots" content="noindex">
 <title>Trip Builder · Anchor And Wand</title>
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="https://speedersnjsitevisits.github.io/Trips/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Anchor &amp; Wand">
 <meta property="og:site_name" content="Anchor And Wand Travel">
-<meta property="og:image" content="share.png">
+<meta property="og:title" content="Your trip · Anchor And Wand Travel">
+<meta property="og:description" content="Your private trip page from Nicole Henderson, Luxury Travel Advisor.">
+<meta property="og:image" content="https://speedersnjsitevisits.github.io/Trips/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -187,7 +192,7 @@ function drawEdit(){
   <div class="card"><h2>Travel details</h2><p class="small mute" style="margin-top:-6px">Flights, stays, cars, car services and reservations, with confirmation numbers and contacts.</p>
   ${(t.bookings||[]).map((b,i)=>{const T=BTYPES[b.type]||BTYPES.other;return `<details class="bk" data-bk="${esc(b.id)}"${openBk.has(b.id)?' open':''}><summary><span class="ty">${T.one}</span><span class="sp"><b>${esc(b.title||'Untitled')}</b><br><span class="small mute">${num(b.from,0)?'Day '+b.from+(T.span&&num(b.to,0)?' → '+b.to:''):'Day not set'}${b.conf?' · '+esc(b.conf):''}</span></span></summary><div class="body g g2">
     <label>Type<select data-b="bookings.${i}.type" data-r>${Object.entries(BTYPES).map(([k,v])=>`<option value="${k}"${k===b.type?' selected':''}>${v.one}</option>`).join('')}</select></label>
-    <label>${b.type==='flight'?'Route (e.g. Newark → Orlando)':b.type==='stay'?'Hotel / resort / rental':'What'}<input data-b="bookings.${i}.title" value="${esc(b.title)}"></label>
+    <label>${b.type==='flight'?'Route (layovers too: Newark → Atlanta → Orlando)':b.type==='stay'?'Hotel / resort / rental':'What'}<input data-b="bookings.${i}.title" value="${esc(b.title)}"></label>
     <label>Details line<input data-b="bookings.${i}.provider" value="${esc(b.provider)}" placeholder="${b.type==='flight'?'United 1234 · lands 10:05 am':b.type==='stay'?'Check-in 3 pm · check-out 11 am':'Company, room type, party size…'}"></label>
     <label>Confirmation #<input data-b="bookings.${i}.conf" value="${esc(b.conf)}"></label>
     <label>${T.span?T.from:'Day'}<select data-b="bookings.${i}.from" data-n data-r>${dayOpts(b.from,T.span)}</select></label>
@@ -206,6 +211,7 @@ function drawEdit(){
     <button class="btn sm" data-a="addplan" data-d="${d}">+ Add to day ${d}</button></div>`}).join('')}</div>
 
   <div class="card"><h2>Packing list</h2><p class="small mute" style="margin-top:-6px">${t.id?`The family has ticked ${packed} of ${(t.packing||[]).length}.`:'Starts from the kind of trip. Edit anything.'}</p>
+  ${(tk.__extra||[]).length?`<div class="day"><b>Added by the family</b><div class="small" style="margin-top:4px">${tk.__extra.map(i=>`${esc(i.text)} <span class="mute">(${esc(i.list)})</span>`).join(' · ')}</div></div>`:''}
   ${lists.map(l=>`<div class="day"><div class="row"><b class="sp">${esc(l)}</b><button class="btn sm" data-a="dellist" data-l="${esc(l)}">${armed==='list:'+l?'Tap again to remove list':'Remove list'}</button></div><div style="margin-top:6px">${(t.packing||[]).map((it,j)=>it.list!==l?'':`<div class="pkl"><input data-b="packing.${j}.text" value="${esc(it.text)}" aria-label="Item"><button class="btn x" data-a="del" data-p="packing.${j}" aria-label="Remove">✕</button></div>`).join('')}</div><button class="btn sm" data-a="additem" data-l="${esc(l)}">+ Item</button></div>`).join('')}
   <div class="day row"><input id="newList" placeholder="New list (e.g. Kids, Grandma)" style="flex:1 1 200px" aria-label="New list name"><button class="btn sm" data-a="addlist">Add list</button>
   <select id="tpl" style="flex:1 1 200px" aria-label="Add a ready-made list"><option value="">Add a ready-made list…</option>${Object.entries(TEMPLATES).filter(([k,[n]])=>!lists.includes(n)).map(([k,[n]])=>`<option value="${k}">${esc(n)}</option>`).join('')}</select></div></div>
